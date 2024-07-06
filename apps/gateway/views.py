@@ -11,14 +11,24 @@ from django.http import HttpResponse
 
 
 class AppointmentProxyView(ServiceAddressMixin, ProxyView):
-    def dispatch(self, request, appointment_id=None):
+    def dispatch(self, request, appointment_id=None, service=None):
         try:
-            # self.get_service_address('appointments')
+            self.get_service_address('appointments')
+            print('ulr is', self.url)
             if not self.url:
                 self.url = 'http://localhost:8001/api/appointments/'
 
-            if appointment_id:
+            if 'doctorid' in request.GET:
+                doctor_id = request.GET.get('doctorid')
+                self.url = f'{self.url}view/doctor_appointments?doctorid={doctor_id}'
+            elif 'patientid' in request.GET:
+                patient_id = request.GET.get('patientid')
+                self.url = f'{self.url}view/patient_appointments?patientid={patient_id}'
+            elif appointment_id:
                 self.url = f'{self.url}{appointment_id}/'
+            else:
+                self.url = f'{self.url}'
+
             return self.proxy_request(request)
         except Exception as e:
             return self.response_from_exception(e)

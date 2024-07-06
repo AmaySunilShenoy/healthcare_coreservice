@@ -22,6 +22,7 @@ class ProxyView(APIView):
                 headers=headers,
                 data=request.body,
             )
+            print('now here in proxy')
             
             
             # Return the response with the same status code

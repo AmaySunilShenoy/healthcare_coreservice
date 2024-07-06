@@ -4,6 +4,7 @@ from .views import AppointmentProxyView, PatientProxyView, DoctorProxyView, Infr
 urlpatterns = [
     path('appointments/', AppointmentProxyView.as_view(), name='appointments_proxy'),
     path('appointments/<int:appointment_id>/', AppointmentProxyView.as_view(), name='appointment_detail_proxy'),
+    path('appointments/view/<str:service>/', AppointmentProxyView.as_view(), name='appointment_view_proxy'),
     path('patients/', PatientProxyView.as_view(), name='patients_proxy'),
     path('patients/<int:patient_id>/', PatientProxyView.as_view(), name='patient_detail_proxy'),
     path('doctors/', DoctorProxyView.as_view(), name='doctors_proxy'),
