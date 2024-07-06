@@ -1,26 +1,55 @@
 from django.shortcuts import render
 from utils.proxy import ProxyView
-from constants import APPOINTMENT_SERVICE_URL, PATIENT_SERVICE_URL, DOCTOR_SERVICE_URL, INFRASTRUCTURE_SERVICE_URL
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from service_registrar.mixins import ServiceAddressMixin
+from django.http import HttpResponse
+
 # Create your views here.
 
 
 
-class AppointmentProxyView(ProxyView):
-    def get(self, request, appointment_id=None):
-        service_url = f"{APPOINTMENT_SERVICE_URL}{appointment_id}/" if appointment_id else APPOINTMENT_SERVICE_URL
-        return self.proxy_request(request, service_url)
+class AppointmentProxyView(ServiceAddressMixin, ProxyView):
+    def dispatch(self, request, appointment_id=None):
+        try:
+            # self.get_service_address('appointments')
+            if not self.url:
+                self.url = 'http://localhost:8001/api/appointments/'
 
-class PatientProxyView(ProxyView):
-    def get(self, request, patient_id=None):
-        service_url = f"{PATIENT_SERVICE_URL}{patient_id}/" if patient_id else PATIENT_SERVICE_URL
-        return self.proxy_request(request, service_url)
+            if appointment_id:
+                self.url = f'{self.url}{appointment_id}/'
+            return self.proxy_request(request)
+        except Exception as e:
+            return self.response_from_exception(e)
 
-class DoctorProxyView(ProxyView):
-    def get(self, request, doctor_id=None):
-        service_url = f"{DOCTOR_SERVICE_URL}{doctor_id}/" if doctor_id else DOCTOR_SERVICE_URL
-        return self.proxy_request(request, service_url)
-    
-class InfrastructureProxyView(ProxyView):
-    def get(self, request, infrastructure_id=None):
-        service_url = f"{INFRASTRUCTURE_SERVICE_URL}{infrastructure_id}/" if infrastructure_id else INFRASTRUCTURE_SERVICE_URL
-        return self.proxy_request(request, service_url)
+class PatientProxyView(ServiceAddressMixin, ProxyView):
+    def dispatch(self, request, patient_id=None):
+        try:
+            self.get_service_address('patients')
+            if patient_id:
+                self.url = f'{self.url}/{patient_id}/'
+            return self.proxy_request(request)
+        except Exception as e:
+            return self.response_from_exception(e)
+        
+class DoctorProxyView(ServiceAddressMixin, ProxyView):
+    def dispatch(self, request, doctor_id=None):
+        try:
+            self.get_service_address('doctors')
+            if doctor_id:
+                self.url = f'{self.url}/{doctor_id}/'
+            return self.proxy_request(request)
+        except Exception as e:
+           return self.response_from_exception(e)
+        
+class InfrastructureProxyView(ServiceAddressMixin, ProxyView):
+    def dispatch(self, request, infrastructure_id=None):
+        try:
+            self.get_service_address('infrastructure')
+            if infrastructure_id:
+                self.url = f'{self.url}/{infrastructure_id}/'
+            return self.proxy_request(request)
+        except Exception as e:
+           return self.response_from_exception(e)
+
